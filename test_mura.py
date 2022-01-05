@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # Parse args
 parser = argparse.ArgumentParser()
-parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/cfg.json', type=str, help='')
+parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--model-state", default='', type=str, help='')
 parser.add_argument("--labels-set", default='mura', type=str, help='')
 parser.add_argument("--batch-size", default=16, type=int, help='')

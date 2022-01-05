@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # Parse args
 parser = argparse.ArgumentParser()
-parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/cfg.json', type=str, help='')
+parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--model-state", default='', type=str, help='')
 parser.add_argument("--labels-set", default='chexnet-14-standard', type=str, help='')
 parser.add_argument("--batch-size", default=16, type=int, help='')
@@ -97,7 +97,6 @@ test_data = CXR.CXRDataset(images_list=os.path.join(dataset_root, model_args['te
                             dataset=model_args['dataset'],
                             images_dir=os.path.join(dataset_root, 'images'),
                             image_paths=os.path.join(dataset_root, 'image_paths.txt'),
-                            copy_to_local=args.copy_to_local,
                             labels_file=os.path.join(dataset_root, 'labels.csv'),
                             labels=model_args['labels'],
                             transform='none',

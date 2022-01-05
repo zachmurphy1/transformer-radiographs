@@ -33,6 +33,7 @@ parser.add_argument("--scratch-dir", default='/export/gaon1/data/zmurphy/transfo
 parser.add_argument("--results-dir", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final', type=str, help='')
 parser.add_argument("--to-analyze", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final/to_analyze_CXR100.json', type=str, help='')
 parser.add_argument("--dir-name", default='CXR100_final', type=str, help='')
+parser.add_argument("--bootstrap-dir", default='bootstrap_raw.pkl', type=str, help='')
 parser.add_argument("--plots", default='y', type=str, help='')
 args = parser.parse_args()
 
@@ -65,6 +66,7 @@ seeds = random.sample(range(1,100000000),n)
 # Get bootstrapped metrics
 results = {}
 for t in to_analyze:
+  print(t['file'])
   with open(t['file'], 'rb') as f:
     m = pickle.load(f)
     
@@ -154,5 +156,5 @@ for t in to_analyze:
   results[t['name']] = sets
 
 # Save raw bootstrap
-with open(os.path.join(args.dir_name, 'bootstrap_raw.pkl'), 'wb') as f:
+with open(os.path.join(args.dir_name, args.bootstrap_dir), 'wb') as f:
     pickle.dump(results, f)

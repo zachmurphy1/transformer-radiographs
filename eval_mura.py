@@ -33,6 +33,7 @@ parser.add_argument("--scratch-dir", default='/export/gaon1/data/zmurphy/transfo
 parser.add_argument("--results-dir", default='/export/gaon1/data/zmurphy/transformer-cxr/mura_results/final', type=str, help='')
 parser.add_argument("--to-analyze", default='/export/gaon1/data/zmurphy/transformer-cxr/mura_results/final/to_analyze_MURA100.json', type=str, help='')
 parser.add_argument("--dir-name", default='MURA100_final', type=str, help='')
+parser.add_argument("--bootstrap-dir", default='bootstrap_raw.pkl', type=str, help='')
 parser.add_argument("--plots", default='y', type=str, help='')
 args = parser.parse_args()
 
@@ -48,16 +49,16 @@ args.scratch_dir = args.scratch_dir.replace('~',os.path.expanduser('~'))
 args.results_dir = args.results_dir.replace('~',os.path.expanduser('~'))
 args.to_analyze = args.to_analyze.replace('~',os.path.expanduser('~'))
 args.dir_name = os.path.join(args.results_dir, args.dir_name)
-if os.path.exists(args.dir_name):
-  shutil.rmtree(args.dir_name)
-os.mkdir(args.dir_name)
+# if os.path.exists(args.dir_name):
+#   shutil.rmtree(args.dir_name)
+# os.mkdir(args.dir_name)
 regions = ['shoulder','humerus','elbow', 'forearm','wrist','hand','finger']
 
 with open(args.to_analyze, 'r') as f:
   to_analyze = json.load(f)
   
 # Read bootstrap data
-with open(os.path.join(args.dir_name, 'bootstrap_raw.pkl'), 'rb') as f:
+with open(os.path.join(args.dir_name, args.bootstrap_dir), 'rb') as f:
     results = pickle.load(f)s
   
 # Pairwise comparisons

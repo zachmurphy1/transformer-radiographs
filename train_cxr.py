@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # Parse args
 parser = argparse.ArgumentParser()
-parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/cfg.json', type=str, help='')
+parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--architecture", default='', type=str, help='DenseNet121 | DeiT')
 parser.add_argument("--pretrained", default='y', type=str, help='y | n')
 parser.add_argument("--labels-set", default='chexnet-14-standard', type=str, help='')
