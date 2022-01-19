@@ -59,16 +59,13 @@ with open(args.to_analyze, 'r') as f:
   
 # Read bootstrap data
 with open(os.path.join(args.dir_name, args.bootstrap_dir), 'rb') as f:
-    results = pickle.load(f)s
+    results = pickle.load(f)
   
 # Pairwise comparisons
 comps = []
-for t in to_analyze:
-  with open(t['file'], 'rb') as f:
-    m = pickle.load(f)
-    
-  for s in m.keys():
-    comps.append((t['name'], s))
+for m_, m in results.items():
+  for s_, s in m.items():
+    comps.append((m_,s_))
     
 pc = []
 for var in ['auc_weighted',
@@ -94,12 +91,12 @@ ci = 0.95
 ci_lower = ((1.0-ci)/2.0) * 100
 ci_upper = (ci+((1.0-ci)/2.0)) * 100
 
-for t in to_analyze:
-  with open(t['file'], 'rb') as f:
-    m = pickle.load(f)
+print(results.keys())
+
+for m_, m in results.items():
+  for s_, s in m.items():
     
-  for s in m.keys():
-    r = results[t['name']][s]
+    r = s
     
     means = r.apply(lambda x: np.nanmean(x), axis=0)
     lci = r.apply(lambda x: max(0.0, np.percentile(x, ci_lower)), axis=0)
@@ -108,8 +105,8 @@ for t in to_analyze:
     r_ = pd.concat([means,lci,uci], axis=1).reset_index(drop=False)
     
     r_.columns = ['Measure','Mean','LCI','UCI']
-    r_['Model'] = t['name']
-    r_['Set'] = s
+    r_['Model'] = m_
+    r_['Set'] = s_
     r_ = r_[['Model','Set','Measure','Mean','LCI','UCI']]
     r_['Display'] = r_.apply(lambda x: '{:.3f} [{:.3f}-{:.3f}]'.format(x['Mean'], x['LCI'], x['UCI']), axis=1)
     rtable = pd.concat([rtable,r_], ignore_index=True)
