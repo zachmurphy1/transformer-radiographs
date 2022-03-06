@@ -1,3 +1,24 @@
+"""Gets yhat for model and dataset
+
+Input:
+  model state: assumes model state from training is at path [model-state]
+
+Args:
+  See parser below
+  
+Output:
+  Appends to dict for dataset saved in pickle file at [results-dir]/[model-state].pkl
+    Structure:
+      {
+        [dataset]_[test-file]:{
+          y: list of ys
+          yhat: list of yhats
+          file: list of file names
+        }
+      }
+
+"""
+
 # Standard
 import os, sys, shutil, json
 import pandas as pd

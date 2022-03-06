@@ -1,0 +1,8 @@
+cfg.json
+export/
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+py3/
+google_images/
+scratch.ipynb
+_pycache__/

@@ -1,3 +1,52 @@
+"""Trains CXR model.
+
+Input:
+  images: assumes there is a dir at [cfg.data_dir]/[dataset] structured as:
+    [dataset]
+      images/: contains all image files in any structure
+      image_paths.txt: paths from [dataset]/images for each image
+      [train file.txt]: list of images to use in train set
+      [val file.txt]: list of images to use in val set
+      [labels.csv]: table of image names and column for each label (0/1 values)
+
+Args:
+  See parser below
+
+Output:
+  model state (torch model state): 
+    saves [model name]_model.pt to [results-dir], taken at best epoch
+    
+  model stats (dict): 
+    saves [model name]_stats.pt to [results-dir], taken at best epoch
+    Structure:
+      {
+        epoch: int
+        loss: {
+          train: list of floats
+          val: list of floats
+        }
+        auc: {
+          train: list of floats
+          val: list of floats
+        }
+        points: {
+          train: {
+            y: list of ints
+            yhat: list of floats
+          }
+          val: {
+            y: list of ints
+            yhat: list of floats
+          }s
+        }
+        timer: list of floats
+      }
+    
+  run stats log: prints stats to [results_dir]/results.csv
+
+"""
+
+
 # Standard
 import os, sys, shutil, json
 import pandas as pd
@@ -9,39 +58,40 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # Parse args
 parser = argparse.ArgumentParser()
-parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
-parser.add_argument("--architecture", default='', type=str, help='DenseNet121 | DeiT')
-parser.add_argument("--pretrained", default='y', type=str, help='y | n')
-parser.add_argument("--labels-set", default='chexnet-14-standard', type=str, help='')
-parser.add_argument("--frozen", default='n', type=str, help='y | n')
-parser.add_argument("--initial-lr", default=1e-2, type=float, help='')
-parser.add_argument("--batch-size", default=16, type=int, help='')
-parser.add_argument("--max-epochs", default=50, type=int, help='')
-parser.add_argument("--optimizer-family", default='SGD', type=str, help='SGD | AdamW')
-parser.add_argument("--weight-decay", default=1e-4, type=float, help='')
-parser.add_argument("--momentum", default=0.9, type=float, help='')
-parser.add_argument("--scheduler-family", default='step', type=str, help='step | drop')
-parser.add_argument("--drop-factor", default=0.1, type=float, help='')
-parser.add_argument("--plateau-patience", default=3, type=int, help='')
-parser.add_argument("--plateau-threshold", default=1e-4, type=float, help='')
-parser.add_argument("--break-patience", default=5, type=int, help='')
-parser.add_argument("--dataset", default='nihcxr14', type=str, help='')
-parser.add_argument("--train-file", default='train_100.txt', type=str, help='')
-parser.add_argument("--val-file", default='val_100.txt', type=str, help='')
-parser.add_argument("--use-parallel", default='y', type=str, help='y | n')
-parser.add_argument("--train-transform", default='hflip', type=str, help='')
-parser.add_argument("--num-workers", default=12, type=int, help='')
-parser.add_argument("--fold", default=0, type=int, help='')
-parser.add_argument("--norm-layer", default='batch', type=str, help='')
-parser.add_argument("--dropout", default=0, type=float, help='')
-parser.add_argument("--use-mixup", default='n', type=str, help='y | n')
-parser.add_argument("--image-size", default=224, type=int, help='')
-parser.add_argument("--print-batches", default='n', type=str, help='y | n')
-parser.add_argument("--scratch-dir", default='~/scratch', type=str, help='')
-parser.add_argument("--results-dir", default='/export/gaon1/data/zmurphy/transformer-cxr/results', type=str, help='')
-parser.add_argument("--use-gpus", default='all', type=str, help='')
+parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='path to cfg.json; using data_dir, labels set')
+parser.add_argument("--architecture", default='', type=str, help='selects architecture (DenseNet121/DeiT_B/DeiT_Ti/ResNet152/EfficientNet_B7)')
+parser.add_argument("--pretrained", default='y', type=str, help='use pretrained model (y/n)')
+parser.add_argument("--labels-set", default='chexnet-14-standard', type=str, help='labels set to use in cfg')
+parser.add_argument("--frozen", default='n', type=str, help='freeze all but task head (y/n)')
+parser.add_argument("--initial-lr", default=1e-2, type=float, help='initial learning rate')
+parser.add_argument("--batch-size", default=16, type=int, help='batch size')
+parser.add_argument("--max-epochs", default=50, type=int, help='stop training after this many epochs')
+parser.add_argument("--optimizer-family", default='SGD', type=str, help='optimizer to use (SGD/AdamW)')
+parser.add_argument("--weight-decay", default=1e-4, type=float, help='weight decay')
+parser.add_argument("--momentum", default=0.9, type=float, help='momentum')
+parser.add_argument("--scheduler-family", default='step', type=str, help='selects scheduler family (step/drop)')
+parser.add_argument("--drop-factor", default=0.1, type=float, help='drop factor for scheduler')
+parser.add_argument("--plateau-patience", default=3, type=int, help='number of epochs to wait for improvement for scehduler')
+parser.add_argument("--plateau-threshold", default=1e-4, type=float, help='minimum change to count as improvement')
+parser.add_argument("--break-patience", default=5, type=int, help='number of epochs to wait for improvement before stopping training')
+parser.add_argument("--dataset", default='nihcxr14', type=str, help='selects dataset (nihcxr14/chexpert/padchest/mimic)')
+parser.add_argument("--train-file", default='train_100.txt', type=str, help='name of txt file to use as training list')
+parser.add_argument("--val-file", default='val_100.txt', type=str, help='name of txt file to use as val list')
+parser.add_argument("--use-parallel", default='y', type=str, help='***')
+parser.add_argument("--train-transform", default='hflip', type=str, help='selects transforms to use in training (hflip/***)')
+parser.add_argument("--num-workers", default=12, type=int, help='number of dataloader workers')
+parser.add_argument("--fold", default=0, type=int, help='id variable for fold number')
+parser.add_argument("--norm-layer", default='batch', type=str, help='which norm layer to use (ViT->layer, CNN-> batch)')
+parser.add_argument("--dropout", default=0, type=float, help='dropout')
+parser.add_argument("--use-mixup", default='n', type=str, help='use mixup/cutmix augmentation')
+parser.add_argument("--image-size", default=224, type=int, help='image size to use')
+parser.add_argument("--print-batches", default='n', type=str, help='print batch updates')
+parser.add_argument("--scratch-dir", default='~/scratch', type=str, help='scratch dir for tmp files')
+parser.add_argument("--results-dir", default='/export/gaon1/data/zmurphy/transformer-cxr/results', type=str, help='directory to save results')
+parser.add_argument("--use-gpus", default='all', type=str, help='gpu ids (comma separated list eg "0,1" or "all")')
 args = parser.parse_args()
 
+"""General setup"""
 # Set GPU vis
 if args.use_gpus != 'all':
     os.environ['CUDA_DEVICE_ORDER']='PCI_BUS_ID'
@@ -124,8 +174,9 @@ def printToResults(to_print,file_name):
 
 print(model_args)
 
+"""Model setup"""
 # Setup
-model = CXR.CXRmodel(model_args)
+model = CXR.get_model(model_args)
 
 # Set dropout
 for m in model.modules():
@@ -223,6 +274,9 @@ elif model_args['scheduler_family'] == 'drop':
     verbose=False
   )
 
+  
+"""Train loop"""
+
 # Train logs
 best_log = {'epoch': -1,
             'loss': {'train': 999999, 'val': 999999},
@@ -257,7 +311,7 @@ for epoch in range(model_args['max_epochs']):
 
     for x, y in trainLoader:
         if model_args['print_batches']:
-            print('Epoch {}\t{} batch {}/{}'.format(epoch, 'train', batch_counter, len(trainLoader)))
+            print('\rEpoch {}\t{} batch {}/{}'.format(epoch, 'train', batch_counter, len(trainLoader)))
         batch_counter += 1
 
         x = x.to(device)
@@ -366,6 +420,7 @@ for epoch in range(model_args['max_epochs']):
     else:
         scheduler.step()
 
+"""Post train"""
 epoch = best_log['epoch']
 train_loss = best_log['loss']['train']
 val_loss = best_log['loss']['val']

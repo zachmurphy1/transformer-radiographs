@@ -1,3 +1,20 @@
+"""Evaluate and visualize bundled models
+
+Input:
+  to_analyze
+  bootstrap_raw.pkl
+  
+Args:
+  See parser below
+  
+Output:
+  label-wise plots: for each dataset, saves a plot of AUC by label stratified by model to [results-dir]/[dir-name]
+  results_table: DataFrame with row for each metric result, columns include model, dataset, measure, mean, lci, uci, and display from bootstrap results, saved to [results-dir]/[dir-name]
+  ttest_table: table of pairwise AUC comparison with columns model 1, set 1, model 2, set 2, metric, t, p saved to [results-dir]/[dir-name]
+  
+
+"""
+
 # Standard
 import os, sys, shutil, json
 import pandas as pd
@@ -73,6 +90,7 @@ for m_, m in results.items():
   for s_, s in m.items():
     
     r = s
+    print(r.shape)
     
     means = r.apply(lambda x: np.nanmean(x), axis=0)
     lci = r.apply(lambda x: max(0.0, np.percentile(x, ci_lower)), axis=0)

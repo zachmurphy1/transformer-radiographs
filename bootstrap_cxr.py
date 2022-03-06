@@ -1,3 +1,31 @@
+"""Gets bootstrapped metrics for given test results
+
+Input:
+  to_analyze: JSON list of models to bundle
+    Structure:
+      [
+        {
+          file: path to .pkl file from test.py
+          name: display name for model
+        }
+      ]
+  
+  test results: .pkl file for each entry in to_analyze, located in [results-dir]
+
+Args:
+  See parser below
+  
+Output:
+  bootstrap_raw.pkl: pickle of dict saved to [dir-name]
+    Structure:
+    {
+      [name from to_analyze]:{
+        [dataset]: DataFrame with row for each resample, columns as below
+      }
+    }
+
+"""
+
 # Standard
 import os, sys, shutil, json
 import pandas as pd

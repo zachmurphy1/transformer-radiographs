@@ -31,7 +31,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--scratch-dir", default='/export/gaon1/data/zmurphy/transformer-cxr', type=str, help='')
 parser.add_argument("--results-dir", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final/CXR100_final', type=str, help='')
-parser.add_argument("--results-table", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final/eval_results/results_table.csv', type=str, help='')
+parser.add_argument("--results-table", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final/CXR100_final/results_table.csv', type=str, help='')
 parser.add_argument("--to-analyze", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final/to_analyze_CXR100.json', type=str, help='')
 args = parser.parse_args()
 
@@ -73,7 +73,7 @@ for f in to_analyze:
   df['yhat_pred'] = (df['yhat'] >= thresh).astype(int)
   
   # FP
-  lists['FP {}'.format(name_rename[f['name']])] = df[(df['y']==0) & (df['yhat_pred']==1)]['file'].sample(n=700, random_state=1234).apply(lambda x: x[x.rfind('/')+1:]).tolist()
+  lists['FP {}'.format(name_rename[f['name']])] = df[(df['y']==0) & (df['yhat_pred']==1)]['file'].apply(lambda x: x[x.rfind('/')+1:]).tolist()
   
   # FN
   lists['FN {}'.format(name_rename[f['name']])] = df[(df['y']==1) & (df['yhat_pred']==0)]['file'].apply(lambda x: x[x.rfind('/')+1:]).tolist()
@@ -89,4 +89,4 @@ for k, l in lists.items():
   to_annotate[k] = to_annotate['study'].isin(l)
 to_annotate['chest_tube'] = np.NaN
 to_annotate = to_annotate[['study','chest_tube','FP DeiT', 'FP DN', 'FN DeiT', 'FN DN']]
-to_annotate.to_csv('/cis/home/zmurphy/code/transformer-radiographs/image_lists/failure_pre_cxr.csv')
+to_annotate.to_csv('/cis/home/zmurphy/code/transformer-radiographs/image_lists/failure_pre_cxr.csv', index=False)
