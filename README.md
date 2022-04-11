@@ -33,10 +33,25 @@ Run train_cxr.py or train_mura.py. Model states are saved to argument results-di
 Run test_cxr.py or test_mura.py. These take in a model state path and get predictions on a test set, which are saved to a .pkl file containing a dict of ys, yhats, and image identifiers. 
 
 # Bootstrap
-*
+Run bootstrap_cxr.py or bootstrap_mura.py. These take in a .pkl from the test script and bootstrap performance metrics.
 
 # Eval
-Run eval_cxr.py or eval_mura.py. The to-analyze argument takes a json file containing a list of dicts with keys "file" (path to .pkl from test script) and "name" (display name for model). 
+Run eval_cxr.py or eval_mura.py. The to-analyze argument takes a json file containing a list of dicts with keys "file" (path to .pkl from test script) and "name" (display name for model). This creates tables and figures of the bootstrapped results.
 
 # Post-eval
-Failure analysis
+All depend on output of eval script. 
+
+## Perf by size
+Creates figure for performance by varying training size.
+
+## Get fractions
+Outputs raw fractions for performance metrics on entire test set.
+
+## Attention maps
+Gets attention and GradCam maps for given images.
+
+## Hidden stratification
+Gets false positives and negatives for manual annnotation. Takes annotations and generates contingency tables.
+
+## Hyperparam analysis
+(Does not depend on eval script.) Generates visualizations of hyperparameter space.

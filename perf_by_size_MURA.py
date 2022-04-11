@@ -73,7 +73,10 @@ for se in dat_m['Set'].drop_duplicates().tolist():
     ttests.loc[(ttests['Set 1']==se)&(ttests['Set 2']==se)&(ttests['Metric']=='auc_weighted')&(ttests['Size 1']==s)&(ttests['Size 2']==s)&(ttests['Model 1']!=ttests['Model 2']), 't'] = mannw.statistic
     ttests.loc[(ttests['Set 1']==se)&(ttests['Set 2']==se)&(ttests['Metric']=='auc_weighted')&(ttests['Size 1']==s)&(ttests['Size 2']==s)&(ttests['Model 1']!=ttests['Model 2']), 'p'] = mannw.pvalue
     
-  
+# Rename DeiT --> DeiT-B
+rtable['Model'] = rtable['Model'].replace('DeiT','DeiT-B')
+ttests['Model 1'] = ttests['Model 1'].replace('DeiT','DeiT-B')
+ttests['Model 2'] = ttests['Model 2'].replace('DeiT','DeiT-B')
 
 
 # Significance value
@@ -95,7 +98,7 @@ for s in sets:
         minmax_by_size[i] = {'min':1, 'max':0}
     
     # Plot each model
-    for i, model in enumerate(['DeiT', 'DenseNet121']):
+    for i, model in enumerate(['DeiT-B', 'DenseNet121']):
         dat_sub = rtable_[rtable_['Model']==model]
         
         plt.errorbar(dat_sub['Size']+shifts[i], dat_sub['Mean'], yerr=[dat_sub['Mean']-dat_sub['LCI'],dat_sub['UCI']-dat_sub['Mean']], label=model, zorder=5+i)

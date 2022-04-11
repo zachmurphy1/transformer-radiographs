@@ -135,7 +135,7 @@ if args.plots == 'y':
   dataset_nicenames = {
       'mura_test':'MURA'
   }
-  model = ['DeiT','DenseNet121']
+  model = ['DeiT-B','DenseNet121']
   dataset = ['mura_test']
   metric = 'auc'
 

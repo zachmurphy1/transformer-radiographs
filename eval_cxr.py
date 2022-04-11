@@ -139,7 +139,7 @@ if args.plots == 'y':
       'mimic_test': 'MIMIC',
       'padchest_test': 'PadChest'
   }
-  model = ['DeiT','DenseNet121']
+  model = ['DeiT-B','DenseNet121']
   dataset = ['nihcxr14_test','padchest_test','chexpert_test','mimic_test']
   metric = 'auc'
 

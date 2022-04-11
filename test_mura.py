@@ -33,6 +33,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 parser = argparse.ArgumentParser()
 parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--model-state", default='', type=str, help='')
+parser.add_argument("--model-type", default='', type=str, help='')
 parser.add_argument("--labels-set", default='mura', type=str, help='')
 parser.add_argument("--batch-size", default=16, type=int, help='')
 parser.add_argument("--dataset", default='mura', type=str, help='')
@@ -40,7 +41,7 @@ parser.add_argument("--test-file", default='test.txt', type=str, help='')
 parser.add_argument("--use-parallel", default='y', type=str, help='y | n')
 parser.add_argument("--num-workers", default=12, type=int, help='')
 parser.add_argument("--image-size", default=224, type=int, help='')
-parser.add_argument("--print-batches", default='n', type=str, help='y | n')
+parser.add_argument("--print-batches", default='y', type=str, help='y | n')
 parser.add_argument("--scratch-dir", default='/export/gaon1/data/zmurphy/transformer-cxr', type=str, help='')
 parser.add_argument("--results-dir", default='/export/gaon1/data/zmurphy/transformer-cxr/mura_results/final', type=str, help='')
 parser.add_argument("--copy-to-local", default='n', type=str, help='y | n')
@@ -84,6 +85,8 @@ args.results_dir = args.results_dir.replace('~',os.path.expanduser('~'))
 # Model params
 model_args = {
     'model_state': args.model_state,
+    'pretrained': False,
+    'model_type': args.model_type,
     'labels_set': args.labels_set,
     'labels': labels,
     'n_labels': len(labels),
@@ -100,17 +103,7 @@ model_args = {
 }
 
 # Setup
-model = None
-if 'DeiT' in model_args['model_state']:
-    # Load DeiT-B
-    torch.hub.set_dir('.'+model_args['results_dir'].replace('.','_'))
-    model = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=False)
-    model.head = nn.Sequential(nn.Linear(in_features=768, out_features=model_args['n_labels']), nn.Sigmoid())
-
-elif 'DenseNet121' in model_args['model_state']:
-  # DenseNet-121
-  model = torchvision.models.densenet121(pretrained=False)
-  model.classifier = nn.Sequential(nn.Linear(in_features=1024, out_features=model_args['n_labels']), nn.Sigmoid())
+model = MURA.get_model(model_args)
 
 
 

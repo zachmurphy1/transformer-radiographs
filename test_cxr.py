@@ -33,6 +33,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 parser = argparse.ArgumentParser()
 parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--model-state", default='', type=str, help='')
+parser.add_argument("--model-type", default='', type=str, help='')
 parser.add_argument("--labels-set", default='chexnet-14-standard', type=str, help='')
 parser.add_argument("--batch-size", default=16, type=int, help='')
 parser.add_argument("--dataset", default='nihcxr14', type=str, help='')
@@ -51,6 +52,7 @@ args = parser.parse_args()
 if args.use_gpus != 'all':
     os.environ['CUDA_DEVICE_ORDER']='PCI_BUS_ID'
     os.environ['CUDA_VISIBLE_DEVICES']=args.use_gpus
+    
 
 # PyTorch
 import torch
@@ -82,6 +84,8 @@ args.results_dir = args.results_dir.replace('~',os.path.expanduser('~'))
 # Model params
 model_args = {
     'model_state': args.model_state,
+    'model_type': args.model_type,
+    'pretrained': False,
     'labels_set': args.labels_set,
     'labels': labels,
     'n_labels': len(labels),
@@ -98,18 +102,7 @@ model_args = {
 }
 
 # Setup
-model = None
-if 'DeiT' in model_args['model_state']:
-    # Load DeiT-B
-    torch.hub.set_dir('.'+model_args['results_dir'].replace('.','_'))
-    model = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=False)
-    model.head = nn.Sequential(nn.Linear(in_features=768, out_features=model_args['n_labels']), nn.Sigmoid())
-
-elif 'DenseNet121' in model_args['model_state']:
-  # DenseNet-121
-  model = torchvision.models.densenet121(pretrained=False)
-  model.classifier = nn.Sequential(nn.Linear(in_features=1024, out_features=model_args['n_labels']), nn.Sigmoid())
-
+model = CXR.get_model(model_args)
 
 
 # Datasets
@@ -131,7 +124,9 @@ dev_n = ncpus
 if torch.cuda.is_available():
     device = 'cuda'
     dev_n = torch.cuda.device_count()
+
 print('Device: {} #: {} #cpus: {}\n'.format(device, dev_n, ncpus))
+
 model.load_state_dict(torch.load(model_args['model_state'], map_location=torch.device(device)))
 
 # Data loaders

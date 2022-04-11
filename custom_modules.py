@@ -78,29 +78,29 @@ def unfreeze_model(model):
 
 def DeiT_B(model_args):
   # Load DeiT-B
-  torch.hub.set_dir('.'+model_args['results_dir'].replace('.','_'))
+  torch.hub.set_dir(model_args['results_dir'].replace('.','_'))
   model = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=model_args['pretrained'])
   model.head = nn.Sequential(nn.Linear(in_features=768, out_features=model_args['n_labels']), nn.Sigmoid())
 
-  # Freeze all but head
-  if model_args['frozen']:
-    model = freeze_model(model)
-  else:
-    model = unfreeze_model(model)
+  # # Freeze all but head
+  # if model_args['frozen']:
+  #   model = freeze_model(model)
+  # else:
+  #   model = unfreeze_model(model)
   
   return model
 
 def DeiT_Ti(model_args):
   # Load DeiT-Ti
-  torch.hub.set_dir('.'+model_args['results_dir'].replace('.','_'))
+  torch.hub.set_dir(model_args['results_dir'].replace('.','_'))
   model = torch.hub.load('facebookresearch/deit:main', 'deit_tiny_patch16_224', pretrained=model_args['pretrained'])
   model.head = nn.Sequential(nn.Linear(in_features=192, out_features=model_args['n_labels']), nn.Sigmoid())
 
-  # Freeze all but head
-  if model_args['frozen']:
-    model = freeze_model(model)
-  else:
-    model = unfreeze_model(model)
+  # # Freeze all but head
+  # if model_args['frozen']:
+  #   model = freeze_model(model)
+  # else:
+  #   model = unfreeze_model(model)
   
   return model
 
@@ -109,11 +109,11 @@ def DenseNet121(model_args):
   model = torchvision.models.densenet121(pretrained=model_args['pretrained'])
   model.classifier = nn.Sequential(nn.Linear(in_features=1024, out_features=model_args['n_labels']), nn.Sigmoid())
 
-  # Freeze all but head
-  if model_args['frozen']:
-    model = freeze_model(model)
-  else:
-    model = unfreeze_model(model)
+  # # Freeze all but head
+  # if model_args['frozen']:
+  #   model = freeze_model(model)
+  # else:
+  #   model = unfreeze_model(model)
     
   return model
 
@@ -122,11 +122,11 @@ def ResNet152(model_args):
   model = torchvision.models.resnet152(pretrained=model_args['pretrained'])
   model.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=model_args['n_labels']), nn.Sigmoid())
 
-  # Freeze all but head
-  if model_args['frozen']:
-    model = freeze_model(model)
-  else:
-    model = unfreeze_model(model)
+  # # Freeze all but head
+  # if model_args['frozen']:
+  #   model = freeze_model(model)
+  # else:
+  #   model = unfreeze_model(model)
     
   return model
 
@@ -135,11 +135,11 @@ def EfficientNet_B7(model_args):
   model = torchvision.models.efficientnet_b7(pretrained=model_args['pretrained'])
   model.classifier = nn.Sequential(nn.Linear(in_features=2560, out_features=model_args['n_labels']), nn.Sigmoid())
 
-  # Freeze all but head
-  if model_args['frozen']:
-    model = freeze_model(model)
-  else:
-    model = unfreeze_model(model)
+  # # Freeze all but head
+  # if model_args['frozen']:
+  #   model = freeze_model(model)
+  # else:
+  #   model = unfreeze_model(model)
     
   return model
 
@@ -277,8 +277,6 @@ class MURADataset(Dataset):
          op='train',  # train/val/test
          img_size=224,  # image size
          return_index=False):
-    
-    print('test2')
 
     # Set attributes
     self.images_file = images_file
