@@ -17,7 +17,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--tmp-dir", default='/export/gaon1/data/zmurphy', type=str, help='')
-parser.add_argument("--target-dir", default='mura', type=str, help='')
+parser.add_argument("--target-dir", default='padchest', type=str, help='')
 args = parser.parse_args()
 
 # Fill in home dirs

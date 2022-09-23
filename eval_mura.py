@@ -48,8 +48,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--scratch-dir", default='/export/gaon1/data/zmurphy/transformer-mura', type=str, help='')
 parser.add_argument("--results-dir", default='/export/gaon1/data/zmurphy/transformer-cxr/mura_results/final', type=str, help='')
-parser.add_argument("--to-analyze", default='/export/gaon1/data/zmurphy/transformer-cxr/mura_results/final/to_analyze_MURA100.json', type=str, help='')
-parser.add_argument("--dir-name", default='MURA100_final', type=str, help='')
+parser.add_argument("--to-analyze", default='/export/gaon1/data/zmurphy/transformer-cxr/mura_results/final/to_analyze_MURA100-Extended.json', type=str, help='')
+parser.add_argument("--dir-name", default='MURA1-10', type=str, help='')
 parser.add_argument("--bootstrap-dir", default='bootstrap_raw.pkl', type=str, help='')
 parser.add_argument("--plots", default='y', type=str, help='')
 args = parser.parse_args()
@@ -95,7 +95,7 @@ for var in ['auc_weighted',
 
     list1 = results[model1][set1][var]
     list2 = results[model2][set2][var]
-    ttest = stats.ttest_ind(list1,list2, nan_policy='omit')
+    ttest = stats.ttest_rel(list1,list2, nan_policy='omit')
     pc.append({'Model 1':model1, 'Set 1':set1, 'Model 2':model2, 'Set 2':set2, 'Metric':var,
                't':ttest.statistic, 'p':ttest.pvalue})
 pc = pd.DataFrame(pc)
@@ -145,7 +145,7 @@ if args.plots == 'y':
     for i, m in enumerate(model):
       dat_plot = pd.DataFrame()
       for l in regions:
-        row = rtable[(rtable['Model']==m)&(rtable['Set']==d)&(rtable['Measure']=='{}_{}'.format(metric,l))]
+        row = rtable[(rtable['Model']==m)&(rtable['Set']==d)&(rtable['Measure']=='{}_{}'.format(metric,l))].copy()
         row['Label'] = l.replace('_',' ')
         dat_plot = dat_plot.append(row, ignore_index=True)
 

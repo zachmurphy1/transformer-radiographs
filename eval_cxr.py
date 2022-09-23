@@ -48,8 +48,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--cfg-dir", default='/cis/home/zmurphy/code/transformer-radiographs/cfg.json', type=str, help='')
 parser.add_argument("--scratch-dir", default='/export/gaon1/data/zmurphy/transformer-cxr', type=str, help='')
 parser.add_argument("--results-dir", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final', type=str, help='')
-parser.add_argument("--to-analyze", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final/to_analyze_CXR100.json', type=str, help='')
-parser.add_argument("--dir-name", default='CXR100_final', type=str, help='')
+parser.add_argument("--to-analyze", default='/export/gaon1/data/zmurphy/transformer-cxr/results/final/to_analyze_CXR1-10.json', type=str, help='')
+parser.add_argument("--dir-name", default='CXR1-10', type=str, help='')
 parser.add_argument("--bootstrap-dir", default='bootstrap_raw.pkl', type=str, help='')
 parser.add_argument("--plots", default='y', type=str, help='')
 args = parser.parse_args()
@@ -76,7 +76,6 @@ with open(args.to_analyze, 'r') as f:
 # Read bootstrap data
 with open(os.path.join(args.dir_name, args.bootstrap_dir), 'rb') as f:
     results = pickle.load(f)
-  
 
 # Get results table
 rtable = pd.DataFrame()
@@ -124,7 +123,7 @@ for var in ['auc_weighted',
 
     list1 = results[model1][set1][var]
     list2 = results[model2][set2][var]
-    ttest = stats.ttest_ind(list1,list2, nan_policy='omit')
+    ttest = stats.ttest_rel(list1,list2, nan_policy='omit')
     pc.append({'Model 1':model1, 'Set 1':set1, 'Model 2':model2, 'Set 2':set2, 'Metric':var,
                't':ttest.statistic, 'p':ttest.pvalue})
 pc = pd.DataFrame(pc)
@@ -149,7 +148,7 @@ if args.plots == 'y':
     for i, m in enumerate(model):
       dat_plot = pd.DataFrame()
       for l in labels:
-        row = rtable[(rtable['Model']==m)&(rtable['Set']==d)&(rtable['Measure']=='{}_{}'.format(metric,l))]
+        row = rtable[(rtable['Model']==m)&(rtable['Set']==d)&(rtable['Measure']=='{}_{}'.format(metric,l))].copy()
         row['Label'] = l.replace('_',' ')
         dat_plot = dat_plot.append(row, ignore_index=True)
 

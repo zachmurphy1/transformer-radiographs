@@ -47,7 +47,7 @@ ttests['p'] = ttests['p'].astype(float)
 ttests
 
 # Replace for 1 and 10 sizes
-from scipy.stats import mannwhitneyu as mwu
+from scipy.stats import wilcoxon
 ci = 0.95
 ci_lower = ((1.0-ci)/2.0) * 100
 ci_upper = (ci+((1.0-ci)/2.0)) * 100
@@ -69,7 +69,7 @@ for se in dat_m['Set'].drop_duplicates().tolist():
       rtable.loc[(rtable['Model']==m)&(rtable['Size']==s)&(rtable['Set']==se),'LCI'] = lci
       rtable.loc[(rtable['Model']==m)&(rtable['Size']==s)&(rtable['Set']==se),'UCI'] = uci
       rtable.loc[(rtable['Model']==m)&(rtable['Size']==s)&(rtable['Set']==se),'Display'] = ''
-    mannw = mwu(means['DeiT'],means['DenseNet121'])
+    mannw = wilcoxon(means['DeiT'],means['DenseNet121'])
     ttests.loc[(ttests['Set 1']==se)&(ttests['Set 2']==se)&(ttests['Metric']=='auc_weighted')&(ttests['Size 1']==s)&(ttests['Size 2']==s)&(ttests['Model 1']!=ttests['Model 2']), 't'] = mannw.statistic
     ttests.loc[(ttests['Set 1']==se)&(ttests['Set 2']==se)&(ttests['Metric']=='auc_weighted')&(ttests['Size 1']==s)&(ttests['Size 2']==s)&(ttests['Model 1']!=ttests['Model 2']), 'p'] = mannw.pvalue
     
